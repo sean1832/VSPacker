@@ -18,7 +18,7 @@ def main():
     solution_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     example_file = os.path.join(solution_root, "Example/grasshopper", "portal-example.gh")
 
-    bd = builder.PackageBuilder(project_dir, project_file)
+    bd = builder.AssemblyBuilder(solution_root, project_dir, project_file)
     bd.build_zip(
         zip_filename=f"{bd.project_name}_v{bd.version}.zip",
         exclude_patterns=["RhinoCommon.dll", "Grasshopper.dll", "*.xml", "*.pdb"],
