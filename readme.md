@@ -1,4 +1,4 @@
-# Packer
+# VSPacker
 
 Packer is a tool for packaging c# projects into a distributable zip file. It is designed to be used in a Post Build event in Visual Studio.
 
