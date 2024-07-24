@@ -5,10 +5,9 @@ from vspacker.vs_project import construct_output_folder, get_info
 
 
 class AssemblyBuilder:
-    def __init__(self, root, project_dir, project_file):
-        self.solution_root = root
-        self.project_dir = project_dir
+    def __init__(self, project_file):
         self.project_file = project_file
+        self.project_dir = os.path.dirname(project_file)
         self.project_name, self.version = get_info(self.project_file)
         self.output_folder = construct_output_folder(self.project_dir, self.version)
         self.validate_paths()
