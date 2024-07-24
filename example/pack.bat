@@ -10,6 +10,8 @@ REM Assign command line arguments to variable
 SET "PROJECT_DIR=%~1"
 SET "PROJECT_PATH=%~2"
 
+REM Go to root directory
+cd ..
 
 REM Navigate to the scripts directory
 cd scripts/
@@ -23,12 +25,9 @@ if not exist "venv\" (
 )
 
 REM Activate the virtual environment
-call venv\Scripts\activate
+call .\venv\Scripts\activate
 
-REM Navigate to the parent directory
-cd ..
-
-python scripts\package.py %PROJECT_DIR% %PROJECT_PATH%
+python package.py %PROJECT_DIR% %PROJECT_PATH%
 
 :END
 ENDLOCAL
