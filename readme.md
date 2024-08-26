@@ -35,10 +35,10 @@ def main():
         zip_filename=f"{proj.project_name}-{proj.version}.zip",
         exclude_patterns=["*.xml", "*.pdb"],
         include_files=[
-            os.path.join(solution_root, "LICENSE"),
+            (os.path.join(solution_root, "LICENSE"), "resources/LICENSE.txt"),
             os.path.join(solution_root, "README.md"),
         ],
-        internal_folder = proj.project_name,
+        internal_folder=proj.project_name,
     )
     proj.copy_file(
         example_file,
