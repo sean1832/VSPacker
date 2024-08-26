@@ -42,22 +42,37 @@ from typing import List
 #     return zip_path
 
 
-def zip_files(dir_path, zip_path, exclude_patterns, include_files, overwrite):
+def zip_files(dir_path, zip_path, exclude_patterns, include_files, overwrite, internal_folder=None):
     files_to_zip = {}
+    
+    # Collect files from the directory
     for root, dirs, files in os.walk(dir_path):
         for file in files:
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, dir_path)
             if not any(fnmatch.fnmatch(relative_path, pattern) for pattern in exclude_patterns):
                 if overwrite or relative_path not in files_to_zip:
+                    # If internal_folder is specified, prepend it to the relative path
+                    if internal_folder:
+                        relative_path = os.path.join(internal_folder, relative_path)
                     files_to_zip[relative_path] = file_path
-    for file in include_files:
-        if not any(
-            fnmatch.fnmatch(file, pattern) for pattern in exclude_patterns
-        ) and os.path.isfile(file):
-            basename = os.path.basename(file)
-            if overwrite or basename not in files_to_zip:
-                files_to_zip[basename] = file
+
+    # Collect additional files specified in include_files
+    for entry in include_files:
+        if isinstance(entry, tuple):
+            src_file, dest_path = entry
+        else:
+            src_file = entry
+            dest_path = os.path.basename(src_file)
+
+        if not any(fnmatch.fnmatch(src_file, pattern) for pattern in exclude_patterns) and os.path.isfile(src_file):
+            if overwrite or dest_path not in files_to_zip:
+                # If internal_folder is specified, prepend it to the dest_path
+                if internal_folder:
+                    dest_path = os.path.join(internal_folder, dest_path)
+                files_to_zip[dest_path] = src_file
+
+    # Write files to the zip archive
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for filename, file_path in files_to_zip.items():
             zipf.write(file_path, filename)

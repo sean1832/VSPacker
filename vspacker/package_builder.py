@@ -21,7 +21,7 @@ class AssemblyBuilder:
         if not self.project_file.endswith(".csproj"):
             raise ValueError(f"Invalid project file: {self.project_file}")
 
-    def build_zip(self, input_dir, zip_filename, exclude_patterns, include_files):
+    def build_zip(self, input_dir, zip_filename, exclude_patterns, include_files, internal_folder=None):
         zip_path = os.path.join(self.output_folder, zip_filename)
         zip_files(
             input_dir,
