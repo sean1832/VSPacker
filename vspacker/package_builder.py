@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from vspacker.io import pack_example, pack_to_folder, zip_files
 from vspacker.vs_project import construct_output_folder, get_info
@@ -47,14 +48,13 @@ class AssemblyBuilder:
     def copy_file(self, src_file, dest_path, rename=None):
         if not os.path.exists(src_file):
             raise FileNotFoundError(f"Source file not found: {src_file}")
-        if rename is not None:
-            dest_path = os.path.join(dest_path, rename)
         if not os.path.exists(dest_path):
-            os.makedirs(dest_path)
-        dest_file = os.path.join(dest_path, os.path.basename(src_file))
-        if os.path.exists(dest_file):
-            raise FileExistsError(f"File already exists: {dest_file}")
-        os.system(f"cp {src_file} {dest_file}")
+            raise FileNotFoundError(f"Destination path not found: {dest_path}")
+        if rename is not None:
+            dest_file = os.path.join(dest_path, rename)
+        else:
+            dest_file = os.path.join(dest_path, os.path.basename(src_file))
+        shutil.copy(src_file, dest_file)
         print(f"File copied successfully: {dest_file}")
         return dest_file
 
