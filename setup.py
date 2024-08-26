@@ -21,11 +21,11 @@ setup(
         ]
     },
     install_requires=[],
-    python_requires=">=3.10",
+    python_requires=">=3.7",
     # https://pypi.org/classifiers/
     classifiers=[
         "Development Status :: 1 - Planning",
-        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.7",
         "Topic :: Utilities",
     ],
 )
