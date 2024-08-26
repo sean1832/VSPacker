@@ -1,6 +1,6 @@
 import os
 
-from vspacker.io import pack_example, zip_files
+from vspacker.io import pack_example, pack_to_folder, zip_files
 from vspacker.vs_project import construct_output_folder, get_info
 
 
@@ -20,19 +20,43 @@ class AssemblyBuilder:
         if not self.project_file.endswith(".csproj"):
             raise ValueError(f"Invalid project file: {self.project_file}")
 
-    def build_zip(self, zip_filename, exclude_patterns, include_files):
-        zip_path = zip_files(
-            zip_filename,
-            self.project_dir,
-            ["*.gha", "*.dll"],
+    def build_zip(self, input_dir, zip_filename, exclude_patterns, include_files):
+        zip_path = os.path.join(self.output_folder, zip_filename)
+        zip_files(
+            input_dir,
+            zip_path,
             exclude_patterns,
             include_files,
-            True,
-            self.project_name,
-            self.output_folder,
+            overwrite=True,
         )
         print(f"Plugin built and zipped successfully: {zip_path}")
         return zip_path
+
+    def build_folder(self, dir_paths, folder_name, exclude_patterns, include_files):
+        output_folder = os.path.join(self.output_folder, folder_name)
+        pack_to_folder(
+            dir_paths,
+            output_folder,
+            exclude_patterns,
+            include_files,
+            overwrite=True,
+        )
+        print(f"Plugin built and copied to: {output_folder}")
+        return output_folder
+
+    def copy_file(self, src_file, dest_path, rename=None):
+        if not os.path.exists(src_file):
+            raise FileNotFoundError(f"Source file not found: {src_file}")
+        if rename is not None:
+            dest_path = os.path.join(dest_path, rename)
+        if not os.path.exists(dest_path):
+            os.makedirs(dest_path)
+        dest_file = os.path.join(dest_path, os.path.basename(src_file))
+        if os.path.exists(dest_file):
+            raise FileExistsError(f"File already exists: {dest_file}")
+        os.system(f"cp {src_file} {dest_file}")
+        print(f"File copied successfully: {dest_file}")
+        return dest_file
 
     def package_example(self, example_file):
         if not os.path.exists(example_file):
