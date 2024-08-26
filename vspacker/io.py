@@ -67,15 +67,13 @@ def zip_files(dir_path, zip_path, exclude_patterns, include_files, overwrite, in
 
         if not any(fnmatch.fnmatch(src_file, pattern) for pattern in exclude_patterns) and os.path.isfile(src_file):
             if overwrite or dest_path not in files_to_zip:
-                # If internal_folder is specified, prepend it to the dest_path
-                if internal_folder:
-                    dest_path = os.path.join(internal_folder, dest_path)
                 files_to_zip[dest_path] = src_file
 
     # Write files to the zip archive
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for filename, file_path in files_to_zip.items():
             zipf.write(file_path, filename)
+
 
 
 def pack_to_folder(
