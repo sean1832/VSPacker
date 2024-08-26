@@ -3,48 +3,12 @@ import os
 import pathlib
 import shutil
 import zipfile
-from typing import List
-
-# def zip_files(
-#     zip_filename,
-#     project_dir,
-#     file_patterns,
-#     exclude_patterns,
-#     include_files,
-#     overwrite,
-#     project_name,
-#     output_folder,
-# ):
-#     zip_path = os.path.join(output_folder, zip_filename)
-#     project_folder_in_zip = f"{project_name}/"
-#     files_to_zip = {}
-#     target_dir = os.path.join(project_dir, "bin", "release", "net48")
-#     for filename in os.listdir(target_dir):
-#         file_path = os.path.join(target_dir, filename)
-#         if os.path.isfile(file_path):
-#             if not any(fnmatch.fnmatch(filename, pattern) for pattern in exclude_patterns) and any(
-#                 fnmatch.fnmatch(filename, pattern) for pattern in file_patterns
-#             ):
-#                 if overwrite or filename not in files_to_zip:
-#                     files_to_zip[filename] = file_path
-#     for file in include_files:
-#         if (
-#             not any(fnmatch.fnmatch(file, pattern) for pattern in exclude_patterns)
-#             and any(fnmatch.fnmatch(file, pattern) for pattern in file_patterns)
-#             and os.path.isfile(file)
-#         ):
-#             basename = os.path.basename(file)
-#             if overwrite or basename not in files_to_zip:
-#                 files_to_zip[basename] = file
-#     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
-#         for filename, file_path in files_to_zip.items():
-#             zipf.write(file_path, project_folder_in_zip + filename)
-#     return zip_path
+from typing import List, Tuple, Union
 
 
 def zip_files(dir_path, zip_path, exclude_patterns, include_files, overwrite, internal_folder=None):
     files_to_zip = {}
-    
+
     # Collect files from the directory
     for root, dirs, files in os.walk(dir_path):
         for file in files:
@@ -65,7 +29,9 @@ def zip_files(dir_path, zip_path, exclude_patterns, include_files, overwrite, in
             src_file = entry
             dest_path = os.path.basename(src_file)
 
-        if not any(fnmatch.fnmatch(src_file, pattern) for pattern in exclude_patterns) and os.path.isfile(src_file):
+        if not any(
+            fnmatch.fnmatch(src_file, pattern) for pattern in exclude_patterns
+        ) and os.path.isfile(src_file):
             if overwrite or dest_path not in files_to_zip:
                 files_to_zip[dest_path] = src_file
 
@@ -75,29 +41,23 @@ def zip_files(dir_path, zip_path, exclude_patterns, include_files, overwrite, in
             zipf.write(file_path, filename)
 
 
-
 def pack_to_folder(
-    dir_paths: List[str] | str,
+    dir_paths: Union[List[str], str],
     output_folder: str,
-    exclude_patterns: List[str] | str,
-    include_files: List[str] | str,
+    exclude_patterns: Union[List[str], str],
+    include_files: Union[List[Union[str, Tuple[str, str]]], Union[str, Tuple[str, str]]],
     overwrite: bool,
 ):
-    """Copy files from multiple directories to a single output folder.
-
-    Args:
-        dir_paths (List[str] | str): directories to copy files from
-        output_folder (str): destination folder
-        exclude_patterns (List[str]): patterns to exclude files from being copied
-        include_files (List[str]): external files to include in the output folder
-        overwrite (bool): overwrite existing files
-    """
+    """Copy files from multiple directories to a single output folder."""
+    
     if isinstance(dir_paths, str):
         dir_paths = [dir_paths]
     if isinstance(exclude_patterns, str):
         exclude_patterns = [exclude_patterns]
-    if isinstance(include_files, str):
+    if isinstance(include_files, (str, tuple)):
         include_files = [include_files]
+
+    # Copy files from specified directories
     for dir_path in dir_paths:
         for root, dirs, files in os.walk(dir_path):
             for file in files:
@@ -109,12 +69,20 @@ def pack_to_folder(
                         os.makedirs(os.path.dirname(output_path), exist_ok=True)
                         shutil.copy(file_path, output_path)
 
-    for file in include_files:
-        output_path = os.path.join(output_folder, os.path.basename(file))
-        if not any(fnmatch.fnmatch(file, pattern) for pattern in exclude_patterns) and (
+    # Include additional files specified in include_files
+    for entry in include_files:
+        if isinstance(entry, tuple):
+            src_file, dest_path = entry
+        else:
+            src_file = entry
+            dest_path = os.path.basename(src_file)
+
+        output_path = os.path.join(output_folder, dest_path)
+        if not any(fnmatch.fnmatch(src_file, pattern) for pattern in exclude_patterns) and (
             overwrite or not os.path.exists(output_path)
         ):
-            shutil.copy(file, output_path)
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            shutil.copy(src_file, output_path)
 
 
 def unzip(zip_path, out_path):
