@@ -29,6 +29,7 @@ class AssemblyBuilder:
             exclude_patterns,
             include_files,
             overwrite=True,
+            internal_folder=internal_folder,
         )
         print(f"Plugin built and zipped successfully: {zip_path}")
         return zip_path
