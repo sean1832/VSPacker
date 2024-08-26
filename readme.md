@@ -19,17 +19,33 @@ See the example below for a simple implementation. For more detail see [examples
 ### Python Implementation
 
 ```python
+import os
 import vspacker.package_builder as builder
 
+
 def main():
-    project_file = "path/to/project/project.csproj"
-    bd = builder.AssemblyBuilder(project_file)
-    bd.build_zip(
-        zip_filename=f"{bd.project_name}_v{bd.version}.zip",
-        exclude_patterns=["RhinoCommon.dll", "Grasshopper.dll", "*.lic"],
-        include_files=["LICENSE", "README.md"],
+    args = parse_args()
+    project_file = args.project_file
+    solution_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    example_file = os.path.join(solution_root, "Example/grasshopper", "portal-example.gh")
+
+    proj = builder.AssemblyBuilder(project_file)
+    proj.build_zip(
+        input_dir=os.path.join(proj.project_dir, "bin", "release", "net48"),
+        zip_filename=f"{proj.project_name}-{proj.version}.zip",
+        exclude_patterns=["*.xml", "*.pdb"],
+        include_files=[
+            os.path.join(solution_root, "LICENSE"),
+            os.path.join(solution_root, "README.md"),
+        ],
+        internal_folder = proj.project_name,
     )
-    bd.package_example("example.gh")
+    proj.copy_file(
+        example_file,
+        proj.output_folder,
+        rename=f"{proj.project_name}-example-{proj.version}.gh",
+    )
+
 
 if __name__ == "__main__":
     main()
